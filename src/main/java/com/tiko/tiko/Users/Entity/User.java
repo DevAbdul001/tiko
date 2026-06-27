@@ -25,16 +25,16 @@ public class User {
     String email;
 
     @Column( name =  "password_hash", nullable = false)
-    String password_hash;
+    String passwordHash;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
 
-    public User (String name , String email, String password_hash){
+    public User (String name , String email, String passwordHash){
         this.name = name;
         this.email = email;
-        this.password_hash = password_hash;
+        this.passwordHash = passwordHash;
     }
 
 
