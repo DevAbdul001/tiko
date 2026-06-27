@@ -19,7 +19,7 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public Long registerUser(RegisterDTO dto){
+    public User registerUser(RegisterDTO dto){
         boolean exists = userRepo.existsByEmail(dto.email());
 
         if(exists){
@@ -31,9 +31,8 @@ public class AuthService {
                 dto.email(),
                 passwordHash
         );
-        userRepo.save(user);
 
-        return user.getId();
+        return userRepo.save(user);
     }
 
     public AuthResponseDTO login(LoginDTO dto){
