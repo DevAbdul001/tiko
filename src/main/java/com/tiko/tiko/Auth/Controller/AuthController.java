@@ -5,10 +5,6 @@ import com.tiko.tiko.Auth.DTO.LoginDTO;
 import com.tiko.tiko.Auth.DTO.RegisterDTO;
 import com.tiko.tiko.Auth.Services.AuthService;
 import com.tiko.tiko.Auth.Services.JWTService;
-import com.tiko.tiko.Users.Entity.User;
-import com.tiko.tiko.Users.Repository.UserRepo;
-import jakarta.servlet.annotation.HttpConstraint;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +13,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -46,8 +42,23 @@ public class AuthController {
         String accessToken = jwtService.generateAccessToken(auth);
         String refreshToken = jwtService.generateRefreshToken(auth);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, accessToken);
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshToken);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .build();
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+
+
 
         return auth;
     }
@@ -60,9 +71,16 @@ public class AuthController {
 
         Long userId = jwtService.extractUserId(refreshToken);
         AuthResponseDTO auth = authService.fetchById(userId);
-        String cookie = jwtService.generateAccessToken(auth);
+        String accessToken = jwtService.generateAccessToken(auth);
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie);
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
 
         return ResponseEntity.ok().build();
     }
