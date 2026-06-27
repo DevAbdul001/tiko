@@ -1,5 +1,6 @@
 package com.tiko.tiko.Auth.Services;
 
+import com.tiko.tiko.Auth.DTO.AuthResponseDTO;
 import com.tiko.tiko.Users.Entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -26,18 +27,18 @@ public class JWTService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(AuthResponseDTO dto) {
         return Jwts.builder()
-                .subject(String.valueOf(user.getId()))
+                .subject(String.valueOf(dto.id()))
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(getSigningKey())
                 .compact();
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(AuthResponseDTO dto) {
         return Jwts.builder()
-                .subject(String.valueOf(user.getId()))
+                .subject(String.valueOf(dto.id()))
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(getSigningKey())

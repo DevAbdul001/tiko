@@ -52,4 +52,14 @@ public class AuthService {
         );
     }
 
+    public AuthResponseDTO fetchById(Long id){
+        User user = userRepo.findById(id)
+                .orElseThrow(()-> new RuntimeException("Invalid user id"));
+        return new AuthResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getEmail()
+        );
+    }
+
 }

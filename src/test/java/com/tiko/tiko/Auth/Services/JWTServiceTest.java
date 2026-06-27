@@ -1,5 +1,6 @@
 package com.tiko.tiko.Auth.Services;
 
+import com.tiko.tiko.Auth.DTO.AuthResponseDTO;
 import com.tiko.tiko.Users.Entity.User;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +18,9 @@ public class JWTServiceTest {
 
     @Test
     void shouldGenerateAccessToken(){
-        User user = new User(
-                "Doe",
-                "doe@app.com",
-                "password"
+        AuthResponseDTO user = new AuthResponseDTO(
+                1L, "Doe", "doe@app.com"
         );
-
-      user.setId(1L);
       String token  = jwtService.generateAccessToken(user);
 
       assertNotNull(token);
@@ -31,13 +28,9 @@ public class JWTServiceTest {
 
     @Test
     void shouldGenerateRefreshToken(){
-        User user = new User(
-                "Doe",
-                "doe@app.com",
-                "password"
+        AuthResponseDTO user = new AuthResponseDTO(
+                1L, "Doe", "doe@app.com"
         );
-
-        user.setId(1L);
         String token  = jwtService.generateRefreshToken(user);
 
         assertNotNull(token);
@@ -45,13 +38,10 @@ public class JWTServiceTest {
 
     @Test
     void shouldExtractName(){
-        User user = new User(
-                "Doe",
-                "doe@app.com",
-                "password"
+        AuthResponseDTO user = new AuthResponseDTO(
+                1L, "Doe", "doe@app.com"
         );
 
-        user.setId(1L);
         String token  = jwtService.generateAccessToken(user);
 
         Long userId = jwtService.extractUserId(token);
