@@ -23,7 +23,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @Column(name = "event_name", nullable = false)
+    @Column(name = "name", nullable = false)
     String name;
 
     @Column(name = "date", nullable = false)
