@@ -1,68 +1,79 @@
 package com.tiko.tiko.Events.Entity;
 
+import com.tiko.tiko.Events.Utils.EventStatus;
+import com.tiko.tiko.Users.Entity.User;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.NonNull;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
+
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
+
 
 @Entity
 @Getter
 @Setter
 @Table(name = "events")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Event {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "name", nullable = false)
-    String name;
+    private String name;
 
     @Column(name = "date", nullable = false)
-    Date date;
-
-    @Column(name = "category_id", nullable = false)
-    Long categoryId;
-
-    @Column(name = "category", nullable = true)
-    String description;
-
-    @Column(name = "ticket_types", nullable = false)
-    List<String> ticketTypes;
-
-    @Column (name = "prices", nullable = false)
-    List <BigDecimal> prices;
+    private LocalDateTime date;
 
     @Column(name = "capacity", nullable = false)
-    BigInteger capacity;
+    private Long capacity;
+
+    @Column(name = "location", nullable = false)
+    private String location;
+
+    @Column(name = "description")
+    String description;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private EventStatus status;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "created_at", insertable = false, updatable = true)
+    @Column(name = "updated_at", insertable = false, updatable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizer_id", nullable = false)
+    private User organizer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", nullable = false)
+    private EventCategory category;
+
 
     public Event(
             String name,
-            Date date,
-            Long categoryId,
-            String description,
-            List<String> ticketTypes,
-            List <BigDecimal> prices,
-            BigInteger capacity
+            User organizer,
+            LocalDateTime date,
+            EventCategory category,
+            Long capacity,
+            String location) {
 
-    ){
         this.name = name;
+        this.organizer = organizer;
         this.date = date;
-        this.categoryId = categoryId;
-        this.description = description;
+        this.category = category;
+        this.capacity = capacity;
+        this.location = location;
+        this.status = EventStatus.DRAFT;
     }
 }

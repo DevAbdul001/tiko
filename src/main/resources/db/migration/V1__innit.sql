@@ -45,12 +45,36 @@ INSERT INTO ticket_types (name) VALUES
     ('REGULAR');
 
 CREATE TABLE IF NOT EXISTS events (
-      id BIGINT AUTO_INCREMENT PRIMARY KEY,
-      name VARCHAR(255) NOT NULL,
-      category_id BIGINT,
-      capacity BIGINT NOT NULL,
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    organizer_id BIGINT NOT NULL,
+  name VARCHAR(255) NOT NULL,
+    date DATETIME NOT NULL,
+  category_id BIGINT,
+  capacity BIGINT NOT NULL,
+    location VARCHAR(255) NOT NULL,
+    description LONGTEXT,
+    image_url VARCHAR(255) ,
+    status ENUM('DRAFT','PUBLISHED','CANCELLED','SOLD_OUT'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
+        CURRENT_TIMESTAMP,
 
-      INDEX idx_events_category (category_id),
+  FOREIGN KEY (category_id) REFERENCES event_categories(id),
+    FOREIGN KEY (organizer_id) REFERENCES  users(id)
+);
 
-      FOREIGN KEY (category_id) REFERENCES event_categories(id)
+CREATE INDEX idx_events_category
+    ON events(category_id);
+CREATE  INDEX idx_events_organizer
+    ON  events(organizer_id);
+
+CREATE TABLE event_ticket_prices (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    event_id BIGINT NOT NULL,
+    ticket_type_id BIGINT NOT NULL,
+    price BIGINT NOT NULL,
+    quantity BIGINT NOT NULL,
+
+    FOREIGN KEY (event_id) REFERENCES  events(id),
+    FOREIGN KEY (ticket_type_id) REFERENCES ticket_types(id)
 );

@@ -1,11 +1,14 @@
 package com.tiko.tiko.Users.Entity;
 
+import com.tiko.tiko.Events.Entity.Event;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,6 +33,8 @@ public class User {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "organizer")
+    private List<Event> events = new ArrayList<>();
 
     public User (String name , String email, String passwordHash){
         this.name = name;
