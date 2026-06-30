@@ -1,13 +1,10 @@
 package com.tiko.tiko.Events.Entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,8 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EventCategory {
 
-    @Column
-    BigInteger id;
+    @Id
+    @GeneratedValue( strategy =  GenerationType.IDENTITY)
+    Long id;
 
     @Column
     String name;
@@ -27,10 +25,8 @@ public class EventCategory {
     private LocalDateTime createdAt;
 
     public EventCategory(
-            BigInteger id,
             String name
     ){
-        this.id = id;
         this.name = name;
     }
 }
