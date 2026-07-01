@@ -10,6 +10,8 @@ import lombok.Setter;
 
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -58,6 +60,9 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private EventCategory category;
+
+    @OneToMany(mappedBy = "event")
+    private List<EventTicketPrice> eventTicketPriceList = new ArrayList<>();
 
 
     public Event(

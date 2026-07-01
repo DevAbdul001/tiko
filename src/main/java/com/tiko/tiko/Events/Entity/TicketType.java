@@ -5,7 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -20,6 +21,9 @@ public class TicketType {
 
     @Column
     String name;
+
+    @OneToMany(mappedBy = "ticketType")
+    private List<EventTicketPrice> eventTicketPrices = new ArrayList<>();
 
     public TicketType(
           String name
