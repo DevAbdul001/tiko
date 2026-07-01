@@ -72,8 +72,8 @@ CREATE TABLE event_ticket_prices (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     event_id BIGINT NOT NULL,
     ticket_type_id BIGINT NOT NULL,
-    price BIGINT NOT NULL,
-    quantity BIGINT NOT NULL,
+    price INT NOT NULL,
+    quantity INT NOT NULL,
 
     FOREIGN KEY (event_id) REFERENCES  events(id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types(id)
