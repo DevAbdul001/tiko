@@ -36,12 +36,10 @@ public class EventTicketPrice {
    public EventTicketPrice(
            int price,
            int quantity,
-           Event event,
            TicketType ticketType
    ){
        this.price = price;
        this.quantity = quantity;
-       this.event = event;
        this.ticketType = ticketType;
    }
 

@@ -61,7 +61,11 @@ public class Event {
     @JoinColumn(name = "category_id", nullable = false)
     private EventCategory category;
 
-    @OneToMany(mappedBy = "event")
+    @OneToMany(
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<EventTicketPrice> eventTicketPriceList = new ArrayList<>();
 
 
@@ -80,5 +84,10 @@ public class Event {
         this.capacity = capacity;
         this.location = location;
         this.status = EventStatus.DRAFT;
+    }
+
+    public void addTicketPrice(EventTicketPrice ticketPrice) {
+        eventTicketPriceList.add(ticketPrice);
+        ticketPrice.setEvent(this);
     }
 }
