@@ -1,9 +1,31 @@
 package com.tiko.tiko.Events.Repository;
 
+import com.tiko.tiko.Events.DTO.EventResponseDTO;
 import com.tiko.tiko.Events.Entity.Event;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.awt.print.Pageable;
 
 
 public interface EventsRepo extends JpaRepository<Event, Long> {
 
+    @Query("""
+    SELECT new com.tiko.tiko.Events.DTO.EventResponseDTO(
+    e.id,
+    u.name,
+    e.name ,
+    e.date,
+    e.capacity,
+    e.location,
+    e.description,
+    e.image_url,
+    e.status
+    )
+    FROM event e
+    JOIN e.organizer u
+    ORDER BY e.date DESC
+""")
+    Page<EventResponseDTO> findAllEvents(Pageable pageable);
 }
