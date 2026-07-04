@@ -1,7 +1,9 @@
 package com.tiko.tiko.Events.Service;
 
 import com.tiko.tiko.Events.DTO.CreateEventRequestDTO;
+import com.tiko.tiko.Events.DTO.EventCategoryResponseDTO;
 import com.tiko.tiko.Events.DTO.TicketPriceRequestDTO;
+import com.tiko.tiko.Events.DTO.TicketTypeResponseDTO;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventCategory;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
@@ -15,6 +17,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Transactional
 public class EventService {
@@ -24,6 +28,26 @@ public class EventService {
     private EventCategoryRepo eventCategoryRepo;
     private TicketTypesRepo ticketTypesRepo;
     private EventTicketPriceRepository eventTicketPriceRepository;
+
+    public List<EventCategoryResponseDTO> fetchEventCategories(){
+        return  eventCategoryRepo.findAll()
+                .stream()
+                .map(eventCategory -> new EventCategoryResponseDTO(
+                        eventCategory.getId(),
+                        eventCategory.getName()
+                ))
+                .toList();
+    }
+
+    public List<TicketTypeResponseDTO> fetchAllTicketTypes (){
+        return ticketTypesRepo.findAll()
+                .stream()
+                .map(ticketType -> new TicketTypeResponseDTO(
+                        ticketType.getId(),
+                        ticketType.getName()
+                ))
+                .toList();
+    }
 
 
     public void createEvent(CreateEventRequestDTO request, User organizer) {
