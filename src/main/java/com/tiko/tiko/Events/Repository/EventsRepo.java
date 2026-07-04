@@ -17,15 +17,15 @@ public interface EventsRepo extends JpaRepository<Event, Long> {
     u.name,
     e.name ,
     e.date,
-    e.capacity,
     e.location,
-    e.description,
-    e.image_url,
+    e.imageUrl,
     e.status
     )
     FROM event e
     JOIN e.organizer u
     ORDER BY e.date DESC
 """)
+
+
     Page<EventResponseDTO> findAllEvents(Pageable pageable);
 }
