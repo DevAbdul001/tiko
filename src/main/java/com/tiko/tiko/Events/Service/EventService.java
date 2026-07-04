@@ -1,9 +1,6 @@
 package com.tiko.tiko.Events.Service;
 
-import com.tiko.tiko.Events.DTO.CreateEventRequestDTO;
-import com.tiko.tiko.Events.DTO.EventCategoryResponseDTO;
-import com.tiko.tiko.Events.DTO.TicketPriceRequestDTO;
-import com.tiko.tiko.Events.DTO.TicketTypeResponseDTO;
+import com.tiko.tiko.Events.DTO.*;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventCategory;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
@@ -15,6 +12,10 @@ import com.tiko.tiko.Events.Repository.TicketTypesRepo;
 import com.tiko.tiko.Users.Entity.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -80,4 +81,12 @@ public class EventService {
         }
         eventsRepo.save(event);
     }
+
+    public Page<EventResponseDTO> getEvents(int page){
+        Pageable pageable = PageRequest.of(page, 20);
+
+        return eventsRepo.findAllEvents(pageable);
+    }
+
+
 }
