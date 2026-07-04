@@ -12,11 +12,7 @@ public record EventResponseDTO(
         String organizerName,
         String name,
         Date date,
-        Long capacity,
         String location,
-        String description,
         String imageUrl,
-        EventStatus status,
-        List<BigDecimal> prices
-
+        EventStatus status
 ) {}
