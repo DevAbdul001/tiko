@@ -25,6 +25,7 @@ public class EventService {
     private TicketTypesRepo ticketTypesRepo;
     private EventTicketPriceRepository eventTicketPriceRepository;
 
+
     public void createEvent(CreateEventRequestDTO request, User organizer) {
 
         EventCategory category = eventCategoryRepo.findById(request.categoryId())
