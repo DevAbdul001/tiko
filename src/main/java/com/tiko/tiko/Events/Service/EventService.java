@@ -89,6 +89,29 @@ public class EventService {
     }
 
 
+    public void updateEvent(Long eventId, UpdateEventRequest request){
+        Event event = eventsRepo.findById(eventId)
+                .orElseThrow(()-> new RuntimeException("Event doesn't exist"));
+        if (request.status() != null){
+            event.setStatus(request.status());
+        }
 
+        if (request.location() != null) {
+            event.setLocation(request.location());
+        }
+
+        if (request.date() != null){
+            event.setDate(request.date());
+        }
+
+        if(request.capacity() != null){
+            event.setCapacity(request.capacity());
+        }
+        if (request.imageUrl() != null){
+            event.setImageUrl(request.imageUrl());
+        }
+
+        eventsRepo.save(event);
+    }
 
 }
