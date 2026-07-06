@@ -21,7 +21,7 @@ public interface EventsRepo extends JpaRepository<Event, Long> {
     e.imageUrl,
     e.status
     )
-    FROM event e
+    FROM Event e
     JOIN e.organizer u
     ORDER BY e.date DESC
 """)
