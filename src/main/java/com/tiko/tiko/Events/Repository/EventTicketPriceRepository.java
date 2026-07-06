@@ -18,7 +18,7 @@ public interface EventTicketPriceRepository extends JpaRepository<EventTicketPri
     )
     FROM EventTicketPrice etp
     JOIN etp.ticketType tt
-    WHERE etp.event.id = :eventid
+    WHERE etp.event.id = :eventId
 """)
     List<TicketPriceDTO> fetchEventTicketPrices(@Param("eventId") Long eventId);
 }
