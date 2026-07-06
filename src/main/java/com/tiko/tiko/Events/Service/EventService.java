@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -26,8 +27,14 @@ public class EventService {
 
     @Autowired
     private EventsRepo eventsRepo;
+
+    @Autowired
     private EventCategoryRepo eventCategoryRepo;
+
+    @Autowired
     private TicketTypesRepo ticketTypesRepo;
+
+    @Autowired
     private EventTicketPriceRepository eventTicketPriceRepository;
 
     public List<EventCategoryResponseDTO> fetchEventCategories(){
@@ -86,6 +93,18 @@ public class EventService {
         Pageable pageable = PageRequest.of(page, 20);
 
         return eventsRepo.findAllEvents(pageable);
+    }
+
+
+    public EventDetailsResponseDTO getEventById(Long id){
+        eventsRepo.findById(id)
+                .orElseThrow(()-> new RuntimeException("Invalid event id"));
+        EventDetailsDTO event = eventsRepo.findByEventId(id);
+        List<TicketPriceDTO> prices = eventTicketPriceRepository.fetchEventTicketPrices(event.id());
+
+        return  new EventDetailsResponseDTO(
+                event, prices
+        );
     }
 
 
