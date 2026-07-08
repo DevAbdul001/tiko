@@ -21,7 +21,7 @@ public class CookieService {
                 .build();
     }
 
-    public ResponseCookie generateRefreshToken(String token){
+    public ResponseCookie generateRefreshCookie(String token){
         return ResponseCookie.from("refreshToken", token)
                 .httpOnly(true)
                 .secure(false)

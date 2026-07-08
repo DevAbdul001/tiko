@@ -33,6 +33,7 @@ public class JWTService {
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
                 .signWith(getSigningKey())
+                .claim("type", "access")
                 .compact();
     }
 
@@ -42,6 +43,7 @@ public class JWTService {
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
                 .signWith(getSigningKey())
+                .claim("type", "refresh")
                 .compact();
     }
 

@@ -43,7 +43,7 @@ public class AuthController {
         String refreshToken = jwtService.generateRefreshToken(result);
 
         ResponseCookie accessCookie = cookieService.generateAccessCookie(accessToken);
-        ResponseCookie refreshCookie = cookieService.generateRefreshToken(refreshToken);
+        ResponseCookie refreshCookie = cookieService.generateRefreshCookie(refreshToken);
 
         response.addHeader("Set-cookie", accessCookie.toString());
         response.addHeader("Set-Cookie", refreshCookie.toString());
@@ -56,6 +56,10 @@ public class AuthController {
             @CookieValue("refreshToken") String refreshToken,
             HttpServletResponse response
     ) {
+        if(refreshToken == null || !jwtService.isValid(refreshToken)){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         Long userId = jwtService.extractUserId(refreshToken);
         AuthResponseDTO dto = authService.fetchById(userId);
 
@@ -67,6 +71,21 @@ public class AuthController {
         return  ResponseEntity.ok().build();
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(
+            @CookieValue("refreshToken") String refreshToken,
+            HttpServletResponse response
+    ) {
+        String token = "";
+
+        ResponseCookie accessCookie = cookieService.generateAccessCookie(token);
+        ResponseCookie refreshCookie = cookieService.generateRefreshCookie(token);
+
+        response.addHeader("Set-Cookie", accessCookie.toString());
+        response.addHeader("Set-Cookie", refreshCookie.toString());
+
+       return ResponseEntity.ok().build();
+    }
 
 
 }
