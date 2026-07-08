@@ -1,16 +1,10 @@
 package com.tiko.tiko.Auth.Controller;
 
-import com.tiko.tiko.Auth.DTO.AuthResponseDTO;
-import com.tiko.tiko.Auth.DTO.LoginDTO;
 import com.tiko.tiko.Auth.DTO.RegisterDTO;
 import com.tiko.tiko.Auth.Services.AuthService;
 import com.tiko.tiko.Auth.Services.JWTService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -31,81 +25,6 @@ public class AuthController {
         authService.registerUser(dto);
     }
 
-    @PostMapping("/login")
-    @ResponseStatus(HttpStatus.OK)
-    public AuthResponseDTO login(
-            @RequestBody LoginDTO dto,
-            HttpServletResponse response
-            ){
-        AuthResponseDTO auth = authService.login(dto);
 
-        String accessToken = jwtService.generateAccessToken(auth);
-        String refreshToken = jwtService.generateRefreshToken(auth);
-
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .build();
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
-
-
-
-        return auth;
-    }
-
-
-    @PostMapping("/refreshToken")
-    public ResponseEntity<Void> refreshToken(
-            @CookieValue("refreshToken") String refreshToken,
-            HttpServletResponse response) {
-
-        Long userId = jwtService.extractUserId(refreshToken);
-        AuthResponseDTO auth = authService.fetchById(userId);
-        String accessToken = jwtService.generateAccessToken(auth);
-
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
-
-        ResponseCookie accessCookie = ResponseCookie.from("accessToken", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(0)
-                .build();
-
-        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(true)
-                .path("/api/auth/refreshToken")
-                .maxAge(0)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-
-        return ResponseEntity.ok().build();
-    }
 
 }
