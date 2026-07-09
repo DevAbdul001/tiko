@@ -1,14 +1,14 @@
 package com.tiko.tiko.Events.Controller;
 
 import com.tiko.tiko.Auth.Services.JWTService;
-import com.tiko.tiko.Events.DTO.CreateEventRequestDTO;
-import com.tiko.tiko.Events.DTO.EventCategoryResponseDTO;
-import com.tiko.tiko.Events.DTO.TicketTypeResponseDTO;
+import com.tiko.tiko.Events.DTO.*;
 import com.tiko.tiko.Events.Service.EventService;
 import com.tiko.tiko.Users.Entity.User;
 import com.tiko.tiko.Users.Service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,5 +42,28 @@ public class EventsController {
         User user = userService.getUserById(userId);
 
         eventService.createEvent(dto, user);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<EventResponseDTO>> getEvents(
+            @RequestParam(defaultValue = "0" ) int page
+    ) {
+        Page<EventResponseDTO> events = eventService.getEvents(page);
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/{eventId}")
+    public EventDetailsResponseDTO getEventByid(
+            @RequestParam("eventId") Long eventId
+    ){
+        return eventService.getEventById(eventId);
+    }
+
+    @PatchMapping("/update")
+    public EventDetailsResponseDTO updateEvent(
+            @RequestBody Long eventId, UpdateEventRequest request
+    ){
+       eventService.updateEvent(eventId, request);
+       return eventService.getEventById(eventId);
     }
 }
