@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -131,6 +132,17 @@ public class EventService {
         }
 
         eventsRepo.save(event);
+    }
+
+    public void deleteEvent(Long userId, Long eventId){
+        Event event = eventsRepo.findById(eventId)
+                .orElseThrow(()-> new RuntimeException("Event doesnt exist"));
+
+       if(!Objects.equals(userId, event.getOrganizer().getId())){
+           throw  new RuntimeException("You're not authorized to delete this event");
+       }
+
+       eventsRepo.deleteById(eventId);
     }
 
 }
