@@ -59,8 +59,10 @@ CREATE TABLE IF NOT EXISTS events (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE
         CURRENT_TIMESTAMP,
 
-  FOREIGN KEY (category_id) REFERENCES event_categories(id),
+  FOREIGN KEY (category_id) REFERENCES event_categories(id)
+    ON DELETE CASCADE,
     FOREIGN KEY (organizer_id) REFERENCES  users(id)
+    ON DELETE CASCADE
 );
 
 CREATE INDEX idx_events_category

@@ -66,4 +66,18 @@ public class EventsController {
        eventService.updateEvent(eventId, request);
        return eventService.getEventById(eventId);
     }
+
+
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable Long eventId,
+            @CookieValue("accessToken") String accessToken
+    ) {
+        Long userId = jwtService.extractUserId(accessToken);
+
+        eventService.deleteEvent(userId, eventId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 }
