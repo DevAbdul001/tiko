@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 @Service
 @Transactional
@@ -59,7 +58,7 @@ public class EventService {
     }
 
 
-    public void createEvent(CreateEventRequestDTO request, User organizer) {
+    public EventDetailsDTO createEvent(CreateEventRequestDTO request, User organizer) {
 
         EventCategory category = eventCategoryRepo.findById(request.categoryId())
                 .orElseThrow(()-> new RuntimeException("Event category doesnt exist"));
@@ -88,6 +87,19 @@ public class EventService {
             event.addTicketPrice(ticketPrice);
         }
         eventsRepo.save(event);
+
+        return new EventDetailsDTO(
+                event.getId(),
+                event.getName(),
+                event.getDate(),
+                event.getLocation(),
+                event.getCapacity(),
+                event.getDescription(),
+                event.getStatus(),
+                event.getImageUrl(),
+                organizer.getName(),
+                organizer.getEmail()
+        );
     }
 
     public Page<EventResponseDTO> getEvents(int page){

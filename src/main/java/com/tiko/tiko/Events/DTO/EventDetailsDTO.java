@@ -9,7 +9,8 @@ public record EventDetailsDTO(
         String name,
         LocalDateTime date,
         String location,
-        String capacity,
+        Long capacity,
+        String description,
         EventStatus status,
         String imageUrl,
 
