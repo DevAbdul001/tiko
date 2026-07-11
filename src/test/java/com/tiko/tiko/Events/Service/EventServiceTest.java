@@ -14,11 +14,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static com.tiko.tiko.Events.Utils.EventStatus.PUBLISHED;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -146,6 +151,33 @@ public class EventServiceTest {
         verify(ticketTypesRepo).findById(2L);
         verify(ticketTypesRepo).findById(3L);
         verify(eventsRepo).save(any(Event.class));
+    }
+
+    @Test
+    void shouldGetEvents(){
+        Pageable pageable = PageRequest.of(0, 20);
+
+        EventResponseDTO event = new EventResponseDTO(
+                1L,
+                "John Doe",
+                "Java Hackathon",
+                LocalDateTime.now(),
+                "Mombasa",
+                "image.png",
+                PUBLISHED
+        );
+
+        Page<EventResponseDTO> page = new PageImpl<>(List.of(event));
+
+        when(eventsRepo.findAllEvents(any(Pageable.class)))
+                .thenReturn(page);
+
+        Page<EventResponseDTO> result = eventService.getEvents(0);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Java Hackathon", result.getContent().get(0).name());
+
+        verify(eventsRepo).findAllEvents(pageable);
     }
 
 }
