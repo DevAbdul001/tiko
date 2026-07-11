@@ -34,14 +34,14 @@ public class EventsController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void createEvent(
+    public EventDetailsDTO createEvent(
             @RequestBody CreateEventRequestDTO dto,
             @CookieValue("accessToken") String accessToken
             ){
         Long userId = jwtService.extractUserId(accessToken);
         User user = userService.getUserById(userId);
 
-        eventService.createEvent(dto, user);
+        return eventService.createEvent(dto, user);
     }
 
     @GetMapping
