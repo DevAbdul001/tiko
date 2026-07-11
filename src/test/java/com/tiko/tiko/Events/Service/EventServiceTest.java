@@ -1,7 +1,9 @@
 package com.tiko.tiko.Events.Service;
 
 import com.tiko.tiko.Events.DTO.EventCategoryResponseDTO;
+import com.tiko.tiko.Events.DTO.TicketTypeResponseDTO;
 import com.tiko.tiko.Events.Entity.EventCategory;
+import com.tiko.tiko.Events.Entity.TicketType;
 import com.tiko.tiko.Events.Repository.EventCategoryRepo;
 import com.tiko.tiko.Events.Repository.EventTicketPriceRepository;
 import com.tiko.tiko.Events.Repository.EventsRepo;
@@ -56,4 +58,25 @@ public class EventServiceTest {
         assertEquals("Conference", result.get(1).name());
         assertEquals("Lecture", result.get(2).name());
     }
+
+    @Test
+    void shouldFetchAllTicketTypes(){
+        List<TicketType> types = List.of(
+                new TicketType("VVIP"),
+                new TicketType("VIP"),
+                new TicketType("Regular")
+        );
+
+        when(ticketTypesRepo.findAll()).thenReturn(types);
+
+        List<TicketTypeResponseDTO> result = eventService.fetchAllTicketTypes();
+
+        assertEquals(3, result.size());
+
+        assertEquals("VVIP", result.get(0).name());
+        assertEquals("VIP", result.get(1).name());
+        assertEquals("Regular", result.get(2).name());
+    }
+
+
 }
