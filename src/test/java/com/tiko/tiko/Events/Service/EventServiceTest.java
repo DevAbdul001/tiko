@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -178,6 +179,68 @@ public class EventServiceTest {
         assertEquals("Java Hackathon", result.getContent().get(0).name());
 
         verify(eventsRepo).findAllEvents(pageable);
+    }
+
+    @Test
+    void shouldFetchEventById(){
+        User organizer = new User( "Doe", "doe@email.com", "password");
+        EventCategory eventCategory = new EventCategory("Hackathon");
+        EventDetailsDTO eventDetailsDTO = new EventDetailsDTO(
+                1L,
+                "Java hackathon",
+                LocalDateTime.now(),
+                "Mombasa",
+                5000L,
+                "A java hackathon",
+                PUBLISHED,
+                "image.png",
+                "Doe",
+                "Doe@mail.com"
+        );
+        List<TicketPriceDTO> ticketPriceDTOList =  List.of(
+                new TicketPriceDTO(
+                        1L,
+                        "VIP",
+                        500,
+                        300
+                ),
+                new TicketPriceDTO(
+                        2L,
+                        "Regular",
+                        300,
+                        200
+                ),
+                new TicketPriceDTO(
+                        3L,
+                        "VVIP",
+                        1000,
+                        100
+                )
+        );
+
+        when(eventsRepo.findById(1L))
+                .thenReturn(
+                        Optional.of(new Event(
+                                "Java hackathon",
+                                organizer,
+                                LocalDateTime.now(),
+                                eventCategory,
+                                5000L,
+                                "Mombasa"
+
+                        ))
+                );
+
+        when(eventsRepo.findByEventId(1L))
+                .thenReturn( eventDetailsDTO );
+
+        when(eventTicketPriceRepository.fetchEventTicketPrices(1L))
+                .thenReturn( ticketPriceDTOList );
+
+        EventDetailsResponseDTO result = eventService.getEventById(1L);
+
+        assertEquals("Doe", result.dto().organizerName());
+
     }
 
 }
