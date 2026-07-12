@@ -243,4 +243,35 @@ public class EventServiceTest {
 
     }
 
+    @Test
+    void shouldUpdateEvent(){
+        User organizer = new User( "Doe", "doe@email.com", "password");
+        EventCategory eventCategory = new EventCategory("Hackathon");
+        Event event = new Event(
+                "Java hackathon",
+                organizer,
+                LocalDateTime.now(),
+                eventCategory,
+                5000L,
+                "Mombasa"
+
+        );
+        UpdateEventRequest request = new UpdateEventRequest(
+                PUBLISHED,
+                "Nairobi",
+                LocalDateTime.now(),
+                7000L,
+                "image.png"
+        );
+
+        when(eventsRepo.findById(1L))
+                .thenReturn(
+                        Optional.of(event)
+                );
+
+        eventService.updateEvent(1L, request, organizer.getId());
+
+        verify(eventsRepo).save(any(Event.class));
+    }
+
 }

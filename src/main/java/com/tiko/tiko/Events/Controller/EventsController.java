@@ -61,9 +61,11 @@ public class EventsController {
 
     @PatchMapping("/update")
     public EventDetailsResponseDTO updateEvent(
-            @RequestBody Long eventId, UpdateEventRequest request
+            @RequestBody Long eventId, UpdateEventRequest request,
+            @CookieValue("accessToken") String accessToken
     ){
-       eventService.updateEvent(eventId, request);
+        Long userId = jwtService.extractUserId(accessToken);
+       eventService.updateEvent(eventId, request, userId);
        return eventService.getEventById(eventId);
     }
 

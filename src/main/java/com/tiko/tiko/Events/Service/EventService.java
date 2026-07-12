@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -121,9 +122,14 @@ public class EventService {
     }
 
 
-    public void updateEvent(Long eventId, UpdateEventRequest request){
+    public void updateEvent(Long eventId, UpdateEventRequest request, Long userId){
         Event event = eventsRepo.findById(eventId)
                 .orElseThrow(()-> new RuntimeException("Event doesn't exist"));
+
+        if(userId != event.getOrganizer().getId()){
+            throw new RuntimeException( "You're not authorized to update this event" );
+        }
+
         if (request.status() != null){
             event.setStatus(request.status());
         }
