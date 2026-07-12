@@ -274,4 +274,27 @@ public class EventServiceTest {
         verify(eventsRepo).save(any(Event.class));
     }
 
+    @Test
+    void shouldDeleteEvent(){
+        User organizer = new User( "Doe", "doe@email.com", "password");
+        organizer.setId(1L);
+        EventCategory eventCategory = new EventCategory("Hackathon");
+        Event event = new Event(
+                "Java hackathon",
+                organizer,
+                LocalDateTime.now(),
+                eventCategory,
+                5000L,
+                "Mombasa"
+
+        );
+
+        when(eventsRepo.findById(2L))
+                .thenReturn(Optional.of(event));
+
+        eventService.deleteEvent(1L, 2L);
+
+        verify(eventsRepo).deleteById(any(Long.class));
+    }
+
 }
