@@ -1,5 +1,6 @@
 package com.tiko.tiko.Events.Entity;
 
+import com.tiko.tiko.Booking.Entities.Booking;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,7 @@ public class TicketType {
 
     @OneToMany(mappedBy = "ticketType")
     private List<EventTicketPrice> eventTicketPrices = new ArrayList<>();
+
 
     public TicketType(
           String name

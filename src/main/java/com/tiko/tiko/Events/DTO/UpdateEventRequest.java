@@ -1,6 +1,6 @@
 package com.tiko.tiko.Events.DTO;
 
-import com.tiko.tiko.Events.Utils.EventStatus;
+import com.tiko.tiko.Events.Enums.EventStatus;
 
 import java.time.LocalDateTime;
 

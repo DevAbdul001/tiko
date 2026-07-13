@@ -1,5 +1,6 @@
 package com.tiko.tiko.Users.Entity;
 
+import com.tiko.tiko.Booking.Entities.Booking;
 import com.tiko.tiko.Events.Entity.Event;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -35,6 +36,9 @@ public class User {
 
     @OneToMany(mappedBy = "organizer")
     private List<Event> events = new ArrayList<>();
+
+    @OneToMany( mappedBy = "user")
+    private List<Booking> bookings = new ArrayList<>();
 
     public User (String name , String email, String passwordHash){
         this.name = name;

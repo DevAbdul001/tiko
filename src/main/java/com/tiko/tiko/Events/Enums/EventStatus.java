@@ -1,4 +1,4 @@
-package com.tiko.tiko.Events.Utils;
+package com.tiko.tiko.Events.Enums;
 
 public enum EventStatus {
     DRAFT,
