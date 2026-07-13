@@ -1,6 +1,7 @@
 package com.tiko.tiko.Events.Entity;
 
-import com.tiko.tiko.Events.Utils.EventStatus;
+import com.tiko.tiko.Booking.Entities.Booking;
+import com.tiko.tiko.Events.Enums.EventStatus;
 import com.tiko.tiko.Users.Entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -68,6 +69,8 @@ public class Event {
     )
     private List<EventTicketPrice> eventTicketPriceList = new ArrayList<>();
 
+    @OneToMany(mappedBy = "event")
+    private List<Booking> bookings = new ArrayList<>();
 
     public Event(
             String name,
