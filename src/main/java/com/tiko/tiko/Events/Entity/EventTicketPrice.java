@@ -1,10 +1,14 @@
 package com.tiko.tiko.Events.Entity;
 
+import com.tiko.tiko.Booking.Entities.BookingItem;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -32,6 +36,9 @@ public class EventTicketPrice {
    @ManyToOne
     @JoinColumn(name = "ticket_type_id")
     private TicketType ticketType;
+
+   @OneToMany( mappedBy = "eventTicketPrice")
+    List<BookingItem> bookingItems = new ArrayList<>();
 
    public EventTicketPrice(
            int price,

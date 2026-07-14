@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -22,7 +24,7 @@ public class Booking {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column( name = "booking_reference", nullable = false)
+    @Column( name = "booking_reference", nullable = false, unique = true)
     private String bookingRef;
 
     @Column( name = "total_amount", nullable = false)
@@ -45,6 +47,13 @@ public class Booking {
     @ManyToOne
     @JoinColumn( name = "user_id", nullable = false)
     private User user;
+
+    @OneToMany (
+            mappedBy = "booking",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<BookingItem> bookingItems = new ArrayList<>();
 
 
     public Booking(
