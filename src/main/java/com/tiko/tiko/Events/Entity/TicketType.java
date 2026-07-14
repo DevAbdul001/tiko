@@ -1,6 +1,7 @@
 package com.tiko.tiko.Events.Entity;
 
 import com.tiko.tiko.Booking.Entities.Booking;
+import com.tiko.tiko.Booking.Entities.BookingItem;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
