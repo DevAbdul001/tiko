@@ -105,7 +105,7 @@ public class EventsRepoTest {
         ticketTypesRepo.save(type);
 
         EventTicketPrice price = new EventTicketPrice(
-                500, 200, type
+                500L, 200, type
         );
         event.addTicketPrice(price);
         Event savedEvent = eventsRepo.save(event);
