@@ -24,7 +24,7 @@ public class EventTicketPrice {
 
     // Price in integer instead of BigInteger since price is stored in cents
     @Column(name = "price", nullable = false)
-    private int price;
+    private Long price;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
@@ -41,7 +41,7 @@ public class EventTicketPrice {
     List<BookingItem> bookingItems = new ArrayList<>();
 
    public EventTicketPrice(
-           int price,
+           Long price,
            int quantity,
            TicketType ticketType
    ){

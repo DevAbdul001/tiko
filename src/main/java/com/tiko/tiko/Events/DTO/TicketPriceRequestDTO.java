@@ -11,7 +11,7 @@ public record TicketPriceRequestDTO(
         Long ticketTypeId,
 
         @PositiveOrZero
-        int price,
+        Long price,
 
         @Positive
         int quantity
