@@ -28,7 +28,7 @@ public class BookingItem {
 
     @Column(name = "unit_price", nullable = false)
     @PositiveOrZero
-    private int unitPrice;
+    private Long unitPrice;
 
     @Column(name = "ticket_name", nullable = false)
     private String ticketName;
@@ -38,12 +38,12 @@ public class BookingItem {
     private Booking booking;
 
     @ManyToOne
-    @JoinColumn( name = "event_ticket_type_id", nullable = false)
+    @JoinColumn( name = "event_ticket_price_id", nullable = false)
     private EventTicketPrice eventTicketPrice;
 
     public BookingItem(
             int quantity,
-            int unitPrice,
+            Long unitPrice,
             String ticketName,
             Booking booking,
             EventTicketPrice eventTicketPrice
