@@ -28,7 +28,7 @@ public class Booking {
     private String bookingRef;
 
     @Column( name = "total_amount", nullable = false)
-    private int totalAmount;
+    private Long totalAmount;
 
     @Enumerated(EnumType.STRING)
     @Column ( name ="status", nullable = false)
@@ -58,7 +58,7 @@ public class Booking {
 
     public Booking(
             String bookingRef,
-            int totalAmount,
+            Long totalAmount,
             Event event,
             User user
     ){

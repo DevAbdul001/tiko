@@ -80,3 +80,32 @@ CREATE TABLE event_ticket_prices (
     FOREIGN KEY (event_id) REFERENCES  events(id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types(id)
 );
+
+CREATE TABLE  IF NOT EXISTS booking (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY ,
+    event_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    booking_ref VARCHAR(255) NOT NULL,
+    total_amount BIGINT NOT NULL ,
+    status ENUM ('PENDING', 'CONFIRMED', 'CANCELLED', 'REFUNDED'),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (event_id) REFERENCES  events(id),
+    FOREIGN KEY (user_id) REFERENCES  users(id)
+);
+
+CREATE INDEX idx_user_booking ON booking(user_id);
+CREATE INDEX idx_event_booking ON booking(event_id);
+
+CREATE TABLE  IF NOT EXISTS booking_item (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY ,
+    booking_id BIGINT NOT NULL,
+    event_ticket_price_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    unit_price BIGINT NOT NULL,
+    ticket_name VARCHAR(50) NOT NULL,
+
+    FOREIGN KEY ( booking_id ) REFERENCES booking(id),
+    FOREIGN KEY (event_ticket_price_id) REFERENCES event_ticket_prices(id)
+);
