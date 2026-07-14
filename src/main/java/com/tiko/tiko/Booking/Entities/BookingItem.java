@@ -54,4 +54,6 @@ public class BookingItem {
       this.booking = booking;
       this.eventTicketPrice = eventTicketPrice;
     }
+
+
 }

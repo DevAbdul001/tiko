@@ -55,6 +55,15 @@ public class Booking {
     )
     private List<BookingItem> bookingItems = new ArrayList<>();
 
+    public void addBookingItem( BookingItem item){
+        bookingItems.add(item);
+        item.setBooking(this);
+    }
+
+    public void removeBookingItem( BookingItem item ){
+        bookingItems.remove( item );
+        item.setBooking(null);
+    }
 
     public Booking(
             String bookingRef,
