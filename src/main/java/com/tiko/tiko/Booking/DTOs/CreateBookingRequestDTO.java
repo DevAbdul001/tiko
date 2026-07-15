@@ -7,7 +7,7 @@ import java.util.List;
 
 public record CreateBookingRequestDTO(
         Long eventId,
-
+        String idempotencyKey,
         @NotEmpty
         List<@Valid BookingItemRequest> items
 ) {}
