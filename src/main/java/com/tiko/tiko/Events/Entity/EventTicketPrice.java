@@ -22,7 +22,7 @@ public class EventTicketPrice {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Price in integer instead of BigInteger since price is stored in cents
+
     @Column(name = "price", nullable = false)
     private Long price;
 
