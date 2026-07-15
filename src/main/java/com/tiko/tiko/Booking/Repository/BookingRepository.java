@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+
 public interface BookingRepository extends JpaRepository <Booking, Long> {
 
     @Query("""
@@ -20,7 +21,7 @@ public interface BookingRepository extends JpaRepository <Booking, Long> {
     )
     FROM Booking b
     JOIN b.user u
-    JOIN b.event e 
+    JOIN b.event e\s
     ORDER BY b.createdAt DESC
 """)
     Page<BookingResponseDTO> findBookingSummaries(Pageable pageable);
