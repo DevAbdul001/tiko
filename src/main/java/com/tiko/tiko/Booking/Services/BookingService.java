@@ -11,6 +11,7 @@ import com.tiko.tiko.Booking.Repository.BookingItemsRepository;
 import com.tiko.tiko.Booking.Repository.BookingRepository;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
+import com.tiko.tiko.Events.Enums.EventStatus;
 import com.tiko.tiko.Events.Repository.EventTicketPriceRepository;
 import com.tiko.tiko.Events.Repository.EventsRepo;
 import com.tiko.tiko.Users.Entity.User;
@@ -69,6 +70,11 @@ public class BookingService {
     }
 
     //Validation
+    private boolean validateEventIsActive(Long eventId){
+        Event event = this.getEvent(eventId);
+        return event.getStatus() == EventStatus.PUBLISHED;
+    }
+
     private int validateTicketAvailability(Long eventId){
         Optional<Event> event = eventsRepo.findById(eventId);
         return event.get().getCapacity();
@@ -78,6 +84,50 @@ public class BookingService {
         Optional<EventTicketPrice> eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId);
         return eventTicketPrice.get().getQuantity();
     }
+
+    private boolean validateTicketTypePriceBelongsToEvent(Long eventTicketPriceId, Long eventId){
+        Optional<EventTicketPrice> eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId);
+        return eventTicketPrice.get().getEvent().getId() == eventId;
+    }
+
+    //Creation
+    private Booking createBookingEntity(CreateBookingRequestDTO requestDTO, Event event, User user){
+        return new Booking(
+                this.generateBookingRef(),
+                0L,
+                event,
+                user
+        );
+    }
+
+    private List<BookingItem> bookingItems(
+            CreateBookingRequestDTO requestDTO,
+            EventTicketPrice eventTicketPrice,
+            Booking booking)
+    {
+       List<BookingItemRequest> itemRequests = requestDTO.items();
+       List<BookingItem> bookingItems = new ArrayList<>();
+
+       for (BookingItemRequest itemRequest : itemRequests)
+       {
+           String ticketName = eventTicketPrice.getTicketType().getName();
+           Long unitPrice = eventTicketPrice.getPrice();
+           BookingItem item = new BookingItem(
+                   itemRequest.quantity(),
+                   unitPrice,
+                   ticketName,
+                   booking,
+                   eventTicketPrice
+           );
+           bookingItems.add(item);
+       }
+
+       return bookingItems;
+    }
+
+
+
+
 
 
 
