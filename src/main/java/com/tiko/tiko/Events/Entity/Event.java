@@ -34,6 +34,7 @@ public class Event {
 
     @Column(name = "capacity", nullable = false)
     private int capacity;
+    
 
     @Column(name = "location", nullable = false)
     private String location;

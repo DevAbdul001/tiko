@@ -8,6 +8,6 @@ public record UpdateEventRequest(
         EventStatus status,
         String location,
         LocalDateTime date,
-        Long capacity,
+        int capacity,
         String imageUrl
 ) {}
