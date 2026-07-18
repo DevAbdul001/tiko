@@ -88,4 +88,8 @@ public class IdempotencyService {
         }
     }
 
+    public void remove(String key) {
+        redisTemplate.delete(key);
+    }
+
 }
