@@ -132,10 +132,17 @@ public class BookingService {
                .sum();
     }
 
+    //Reserve ticket
+    @Transactional
+    private  void reserveTicket(Long ticketPriceId, int quantity){
 
+        Optional<EventTicketPrice> ticket = eventTicketPriceRepository.findByIdForUpdate(ticketPriceId);
 
-
-
+        if (ticket.get().getRemainingTickets() < quantity) {
+            throw  new RuntimeException("Not enough tickets" + ticket.get().getRemainingTickets());
+        }
+        ticket.get().setRemainingTickets(ticket.get().getRemainingTickets() - quantity);
+    }
 
 
 

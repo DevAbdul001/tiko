@@ -76,6 +76,7 @@ CREATE TABLE event_ticket_prices (
     ticket_type_id BIGINT NOT NULL,
     price BIGINT NOT NULL,
     quantity INT NOT NULL,
+    remaining_tickets INT NOT NULL,
 
     FOREIGN KEY (event_id) REFERENCES  events(id),
     FOREIGN KEY (ticket_type_id) REFERENCES ticket_types(id)

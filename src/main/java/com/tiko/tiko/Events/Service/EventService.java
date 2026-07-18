@@ -84,6 +84,7 @@ public class EventService {
                     ticketType
             );
 
+            ticketPrice.initializeRemainingTickets();
             event.addTicketPrice(ticketPrice);
         }
         eventsRepo.save(event);
@@ -141,7 +142,7 @@ public class EventService {
             event.setDate(request.date());
         }
 
-        if(request.capacity() != null){
+        if(request.capacity() != -1 ){
             event.setCapacity(request.capacity());
         }
         if (request.imageUrl() != null){

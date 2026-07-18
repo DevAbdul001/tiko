@@ -29,6 +29,9 @@ public class EventTicketPrice {
     @Column(name = "quantity", nullable = false)
     private int quantity;
 
+    @Column(name = "remaining_tickets", nullable = false)
+    private int remainingTickets;
+
    @ManyToOne
     @JoinColumn(name = "event_id")
     private Event event;
@@ -49,5 +52,9 @@ public class EventTicketPrice {
        this.quantity = quantity;
        this.ticketType = ticketType;
    }
+
+    public void initializeRemainingTickets() {
+        this.remainingTickets = this.quantity;
+    }
 
 }
