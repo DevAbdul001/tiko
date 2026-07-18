@@ -11,9 +11,11 @@ import com.tiko.tiko.Booking.Repository.BookingItemsRepository;
 import com.tiko.tiko.Booking.Repository.BookingRepository;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
+import com.tiko.tiko.Events.Entity.TicketType;
 import com.tiko.tiko.Events.Enums.EventStatus;
 import com.tiko.tiko.Events.Repository.EventTicketPriceRepository;
 import com.tiko.tiko.Events.Repository.EventsRepo;
+import com.tiko.tiko.Events.Repository.TicketTypesRepo;
 import com.tiko.tiko.Users.Entity.User;
 import com.tiko.tiko.Users.Repository.UserRepo;
 import com.tiko.tiko.Users.Service.UserService;
@@ -23,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -46,6 +50,9 @@ public class BookingService {
     @Autowired
     private IdempotencyService idempotencyService;
 
+    @Autowired
+    private TicketTypesRepo ticketTypesRepo;
+
 
     //utility method : generates a random 36 char string
     private String generateBookingRef(){
@@ -58,7 +65,7 @@ public class BookingService {
                 .encodeToString(bytes);
     }
 
-    //Entity lookups
+    //Entity lookups====================================================================================================
     private User getUser(Long userId){
         return userRepo.findById(userId)
                 .orElseThrow(()-> new RuntimeException("User does not exist"));
@@ -69,28 +76,40 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Event not found"));
     }
 
-    //Validation
-    private boolean validateEventIsActive(Long eventId){
+    private Map<Long, EventTicketPrice> getEventTicketPrices(CreateBookingRequestDTO request) {
+
+        List<EventTicketPrice> ticketPrices =
+                eventTicketPriceRepository.findAllById(request.ticketPriceIds());
+
+        return ticketPrices.stream()
+                .collect(Collectors.toMap(
+                        EventTicketPrice::getId,
+                        Function.identity()
+                ));
+    }
+
+    //Validation========================================================================================================
+    private void validateEventIsActive(Long eventId){
         Event event = this.getEvent(eventId);
-        return event.getStatus() == EventStatus.PUBLISHED;
+        if(event.getStatus() != EventStatus.PUBLISHED){
+            throw new RuntimeException("Event is not available for booking");
+        }
     }
 
-    private int validateTicketAvailability(Long eventId){
-        Optional<Event> event = eventsRepo.findById(eventId);
-        return event.get().getCapacity();
+
+    private void validateTicketTypeAvailability(Long eventTicketPriceId){
+        EventTicketPrice eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId)
+                .orElseThrow(()-> new RuntimeException("Invalid ticket type"));
     }
 
-    private int validateTicketTypeAvailability(Long eventTicketPriceId){
+    private void validateTicketTypePriceBelongsToEvent(Long eventTicketPriceId, Long eventId){
         Optional<EventTicketPrice> eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId);
-        return eventTicketPrice.get().getQuantity();
+        if (eventTicketPrice.get().getEvent().getId() != eventId){
+            throw new RuntimeException("Ticket price does not belong to event");
+        }
     }
 
-    private boolean validateTicketTypePriceBelongsToEvent(Long eventTicketPriceId, Long eventId){
-        Optional<EventTicketPrice> eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId);
-        return eventTicketPrice.get().getEvent().getId() == eventId;
-    }
-
-    //Creation
+    //Creation==========================================================================================================
     private Booking createBookingEntity(CreateBookingRequestDTO requestDTO, Event event, User user){
         return new Booking(
                 this.generateBookingRef(),
@@ -100,39 +119,40 @@ public class BookingService {
         );
     }
 
-    private List<BookingItem> bookingItems(
+    private List<BookingItem> createBookingItemsEntity(
             CreateBookingRequestDTO requestDTO,
-            EventTicketPrice eventTicketPrice,
-            Booking booking)
-    {
-       List<BookingItemRequest> itemRequests = requestDTO.items();
-       List<BookingItem> bookingItems = new ArrayList<>();
+            Map<Long, EventTicketPrice> ticketPrices,
+            Booking booking) {
 
-       for (BookingItemRequest itemRequest : itemRequests)
-       {
-           String ticketName = eventTicketPrice.getTicketType().getName();
-           Long unitPrice = eventTicketPrice.getPrice();
-           BookingItem item = new BookingItem(
-                   itemRequest.quantity(),
-                   unitPrice,
-                   ticketName,
-                   booking,
-                   eventTicketPrice
-           );
-           bookingItems.add(item);
-       }
+        List<BookingItem> bookingItems = new ArrayList<>();
 
-       return bookingItems;
+        for (BookingItemRequest itemRequest : requestDTO.items()) {
+
+            EventTicketPrice ticketPrice =
+                    ticketPrices.get(itemRequest.eventTicketPriceId());
+
+            BookingItem item = new BookingItem(
+                    itemRequest.quantity(),
+                    ticketPrice.getPrice(),
+                    ticketPrice.getTicketType().getName(),
+                    booking,
+                    ticketPrice
+            );
+
+            bookingItems.add(item);
+        }
+
+        return bookingItems;
     }
 
-    //Calculations
+    //Calculations======================================================================================================
     private Long getTotalAmount(List<BookingItem> bookingItems){
        return bookingItems.stream()
                .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
                .sum();
     }
 
-    //Reserve ticket
+    //Reserve ticket====================================================================================================
     @Transactional
     private  void reserveTicket(Long ticketPriceId, int quantity){
 
@@ -144,7 +164,41 @@ public class BookingService {
         ticket.get().setRemainingTickets(ticket.get().getRemainingTickets() - quantity);
     }
 
+    //Idempotency======================================================================================================
+    private IdempotencyRecord getKey(String key){
+        return  idempotencyService.get(key);
+    }
+
+    public Booking createBooking(CreateBookingRequestDTO requestDTO, Long userId){
+        //Entity lookup
+        User user = this.getUser(userId);
+        Event event = this.getEvent(requestDTO.eventId());
+        Map<Long, EventTicketPrice> ticketPriceMap = this.getEventTicketPrices(requestDTO);
 
 
+        //Validation
+        this.validateEventIsActive(event.getId());
+        for (BookingItemRequest item : requestDTO.items() ){
+            this.validateTicketTypeAvailability(item.eventTicketPriceId());
+        }
+        for (BookingItemRequest itemRequest : requestDTO.items()){
+            this.validateTicketTypePriceBelongsToEvent(itemRequest.eventTicketPriceId(), event.getId());
+        }
+
+        Booking booking = this.createBookingEntity(requestDTO, event, user);
+        List<BookingItem> bookingItems = this.createBookingItemsEntity(
+                requestDTO,
+                ticketPriceMap,
+                booking
+        );
+
+        booking.setTotalAmount(this.getTotalAmount(bookingItems));
+        for (BookingItemRequest itemRequest : requestDTO.items()){
+            this.reserveTicket(itemRequest.eventTicketPriceId(),itemRequest.quantity());
+        }
+
+        return bookingRepository.save(booking);
+
+    }
 
 }
