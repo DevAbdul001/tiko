@@ -57,6 +57,7 @@ public class BookingService {
                 .encodeToString(bytes);
     }
 
+    //Entity lookups
     private User getUser(Long userId){
         return userRepo.findById(userId)
                 .orElseThrow(()-> new RuntimeException("User does not exist"));
@@ -66,6 +67,18 @@ public class BookingService {
         return eventsRepo.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Event not found"));
     }
+
+    //Validation
+    private int validateTicketAvailability(Long eventId){
+        Optional<Event> event = eventsRepo.findById(eventId);
+        return event.get().getCapacity();
+    }
+
+    private int validateTicketTypeAvailability(Long eventTicketPriceId){
+        Optional<EventTicketPrice> eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId);
+        return eventTicketPrice.get().getQuantity();
+    }
+
 
 
 
