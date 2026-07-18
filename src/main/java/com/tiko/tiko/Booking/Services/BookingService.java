@@ -125,6 +125,12 @@ public class BookingService {
        return bookingItems;
     }
 
+    //Calculations
+    private Long getTotalAmount(List<BookingItem> bookingItems){
+       return bookingItems.stream()
+               .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
+               .sum();
+    }
 
 
 
