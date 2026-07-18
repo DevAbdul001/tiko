@@ -33,7 +33,7 @@ public class Event {
     private LocalDateTime date;
 
     @Column(name = "capacity", nullable = false)
-    private Long capacity;
+    private int capacity;
 
     @Column(name = "location", nullable = false)
     private String location;
@@ -77,7 +77,7 @@ public class Event {
             User organizer,
             LocalDateTime date,
             EventCategory category,
-            Long capacity,
+            int capacity,
             String location) {
 
         this.name = name;

@@ -8,6 +8,6 @@ public record BookingItemRequest(
         Long eventTicketPriceId,
 
         @Positive
-        int quantity
+        Long quantity
 ) {
 }

@@ -225,7 +225,7 @@ public class EventServiceTest {
                                 organizer,
                                 LocalDateTime.now(),
                                 eventCategory,
-                                5000L,
+                                5000,
                                 "Mombasa"
 
                         ))
@@ -252,7 +252,7 @@ public class EventServiceTest {
                 organizer,
                 LocalDateTime.now(),
                 eventCategory,
-                5000L,
+                5000,
                 "Mombasa"
 
         );
@@ -284,7 +284,7 @@ public class EventServiceTest {
                 organizer,
                 LocalDateTime.now(),
                 eventCategory,
-                5000L,
+                5000,
                 "Mombasa"
 
         );

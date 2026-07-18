@@ -55,7 +55,7 @@ public class EventsRepoTest {
                 organizer,
                 LocalDateTime.now(),
                 category,
-                500L,
+                500,
                 "Nairobi"
         );
         event.setImageUrl("image.png");
@@ -94,7 +94,7 @@ public class EventsRepoTest {
                 organizer,
                 LocalDateTime.now(),
                 category,
-                500L,
+                500,
                 "Nairobi"
         );
 

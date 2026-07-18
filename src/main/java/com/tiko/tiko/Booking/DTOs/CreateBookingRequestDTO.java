@@ -10,4 +10,11 @@ public record CreateBookingRequestDTO(
         String idempotencyKey,
         @NotEmpty
         List<@Valid BookingItemRequest> items
-) {}
+) {
+        public int getTotalTickets(){
+                return items.stream()
+                        .mapToInt(BookingItemRequest::quantity)
+                        .sum();
+        }
+
+}
