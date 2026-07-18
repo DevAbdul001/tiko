@@ -76,6 +76,11 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Event not found"));
     }
 
+    private Booking getBooking(Long bookingId){
+        return  bookingRepository.findById(bookingId)
+                .orElseThrow(()-> new RuntimeException("Booking not found"));
+    }
+
     private Map<Long, EventTicketPrice> getEventTicketPrices(CreateBookingRequestDTO request) {
 
         List<EventTicketPrice> ticketPrices =
@@ -170,35 +175,61 @@ public class BookingService {
     }
 
     public Booking createBooking(CreateBookingRequestDTO requestDTO, Long userId){
-        //Entity lookup
-        User user = this.getUser(userId);
-        Event event = this.getEvent(requestDTO.eventId());
-        Map<Long, EventTicketPrice> ticketPriceMap = this.getEventTicketPrices(requestDTO);
+       IdempotencyRecord idempotencyRecord = this.getKey(requestDTO.idempotencyKey());
 
-
-        //Validation
-        this.validateEventIsActive(event.getId());
-        for (BookingItemRequest item : requestDTO.items() ){
-            this.validateTicketTypeAvailability(item.eventTicketPriceId());
-        }
-        for (BookingItemRequest itemRequest : requestDTO.items()){
-            this.validateTicketTypePriceBelongsToEvent(itemRequest.eventTicketPriceId(), event.getId());
-        }
-
-        Booking booking = this.createBookingEntity(requestDTO, event, user);
-        List<BookingItem> bookingItems = this.createBookingItemsEntity(
-                requestDTO,
-                ticketPriceMap,
-                booking
-        );
-
-        booking.setTotalAmount(this.getTotalAmount(bookingItems));
-        for (BookingItemRequest itemRequest : requestDTO.items()){
-            this.reserveTicket(itemRequest.eventTicketPriceId(),itemRequest.quantity());
+       if (idempotencyRecord != null) {
+           if (idempotencyRecord.status() == IdempotencyStatus.COMPLETED){
+                return this.getBooking(idempotencyRecord.bookingId());
+           }
+           if (idempotencyRecord.status() == IdempotencyStatus.PROCESSING){
+               throw new RuntimeException("Request is already being processed.");           }
+       }
+       boolean started = idempotencyService.start(requestDTO.idempotencyKey());
+        if (!started) {
+            throw new RuntimeException("Duplicate request.");
         }
 
-        return bookingRepository.save(booking);
+       try {
 
-    }
+            //Entity lookup
+            User user = this.getUser(userId);
+            Event event = this.getEvent(requestDTO.eventId());
+            Map<Long, EventTicketPrice> ticketPriceMap = this.getEventTicketPrices(requestDTO);
+
+
+            //Validation
+            this.validateEventIsActive(event.getId());
+            for (BookingItemRequest item : requestDTO.items() ){
+                this.validateTicketTypeAvailability(item.eventTicketPriceId());
+            }
+            for (BookingItemRequest itemRequest : requestDTO.items()){
+                this.validateTicketTypePriceBelongsToEvent(itemRequest.eventTicketPriceId(), event.getId());
+            }
+
+            Booking booking = this.createBookingEntity(requestDTO, event, user);
+            List<BookingItem> bookingItems = this.createBookingItemsEntity(
+                    requestDTO,
+                    ticketPriceMap,
+                    booking
+            );
+
+            booking.setTotalAmount(this.getTotalAmount(bookingItems));
+            for (BookingItemRequest itemRequest : requestDTO.items()){
+                this.reserveTicket(itemRequest.eventTicketPriceId(),itemRequest.quantity());
+            }
+
+            Booking newBooking = bookingRepository.save(booking);
+           assert idempotencyRecord != null;
+           idempotencyService.complete(idempotencyRecord.key(), newBooking);
+            return  newBooking;
+
+    } catch (Exception e) {
+
+           assert idempotencyRecord != null;
+           idempotencyService.remove(idempotencyRecord.key());
+            throw (e);
+        }
+
+        }
 
 }
