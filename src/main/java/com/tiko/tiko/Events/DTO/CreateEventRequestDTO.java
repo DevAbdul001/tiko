@@ -19,7 +19,7 @@ public record CreateEventRequestDTO(
         LocalDateTime date,
 
         @NotNull
-        Long capacity,
+        int capacity,
 
         @NotBlank
         String location,
