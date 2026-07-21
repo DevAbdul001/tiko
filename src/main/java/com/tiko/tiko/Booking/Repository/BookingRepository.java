@@ -41,5 +41,5 @@ public interface BookingRepository extends JpaRepository <Booking, Long> {
     WHERE b.userId = :userId
     ORDER BY b.createdAt DESC
 """)
-    Page<BookingResponseDTO> findUserBookingSummary(@Param("userId") Long userId);
+    Page<BookingResponseDTO> findUserBookingSummary(@Param("userId") Long userId, Pageable pageable);
 }

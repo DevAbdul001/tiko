@@ -18,6 +18,9 @@ import com.tiko.tiko.Users.Repository.UserRepo;
 import com.tiko.tiko.Users.Service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -252,6 +255,13 @@ public class BookingService {
             return new BookingDetailsResponseDTO(
                     bookingResponseDTO, bookingItemsResponseDTOS
             );
+        }
+
+        public Page<BookingResponseDTO> getBookingSummaryForUser(Long userId, int page){
+            User user = this.getUser(userId);
+            Pageable pageable = PageRequest.of(page, 20);
+
+            return bookingRepository.findUserBookingSummary(user.getId(),pageable);
         }
 
 }
