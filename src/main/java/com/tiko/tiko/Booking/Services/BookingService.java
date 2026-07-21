@@ -1,9 +1,6 @@
 package com.tiko.tiko.Booking.Services;
 
-import com.tiko.tiko.Booking.DTOs.BookingItemRequest;
-import com.tiko.tiko.Booking.DTOs.BookingResponseDTO;
-import com.tiko.tiko.Booking.DTOs.CreateBookingRequestDTO;
-import com.tiko.tiko.Booking.DTOs.IdempotencyRecord;
+import com.tiko.tiko.Booking.DTOs.*;
 import com.tiko.tiko.Booking.Entities.Booking;
 import com.tiko.tiko.Booking.Entities.BookingItem;
 import com.tiko.tiko.Booking.Enums.IdempotencyStatus;
@@ -230,6 +227,31 @@ public class BookingService {
             throw (e);
         }
 
+        }
+
+        public BookingDetailsResponseDTO fetchBookingById( Long bookingId, Long userId ){
+                User user = this.getUser(userId);
+                Booking booking = this.getBooking(bookingId);
+
+                if (!Objects.equals(user.getId(), booking.getUser().getId())){
+                    throw new RuntimeException("Not authorized to fetch booking");
+                }
+
+                BookingResponseDTO bookingResponseDTO = new BookingResponseDTO(
+                        booking.getId(),
+                        booking.getBookingRef(),
+                        booking.getUser().getName(),
+                        booking.getEvent().getName(),
+                        booking.getTotalAmount(),
+                        booking.getCreatedAt()
+                );
+
+                List<BookingItemsResponseDTO> bookingItemsResponseDTOS =
+                        bookingItemsRepository.findBookingItemsByBookingId(booking.getId());
+
+            return new BookingDetailsResponseDTO(
+                    bookingResponseDTO, bookingItemsResponseDTOS
+            );
         }
 
 }
