@@ -9,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface BookingItemsRepository extends JpaRepository <BookingItemsResponseDTO, Long> {
+public interface BookingItemsRepository extends JpaRepository <BookingItem, Long> {
 
     @Query("""
     SELECT new com.tiko.tiko.Booking.DTOs.BookingItemsResponseDTO(

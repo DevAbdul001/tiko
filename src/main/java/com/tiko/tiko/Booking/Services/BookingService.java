@@ -93,6 +93,10 @@ public class BookingService {
                 ));
     }
 
+    private List<BookingItemsResponseDTO> getBookingItemsByBookingId(Long bookingId){
+        return  bookingItemsRepository.findBookingItemsByBookingId(bookingId);
+    }
+
     //Validation========================================================================================================
     private void validateEventIsActive(Long eventId){
         Event event = this.getEvent(eventId);
@@ -263,5 +267,44 @@ public class BookingService {
 
             return bookingRepository.findUserBookingSummary(user.getId(),pageable);
         }
+
+        public List<BookingItemsResponseDTO> updateBookingItems(UpdateBookingItemDTO dto, Long userId){
+            User user = this.getUser(userId);
+            Booking booking = this.getBooking(dto.bookingId());
+            List<BookingItemsResponseDTO> itemsResponseDTOS = this.getBookingItemsByBookingId(booking.getId());
+            List<BookingItem> bookingItems = bookingItemsRepository.findAllById(dto.itemIds());
+
+           Set<Long> dtoIds = new HashSet<>();
+
+            if (bookingItems.size() != dto.itemIds().size()) {
+                throw new RuntimeException("One or more booking items do not exist.");
+            }
+
+            if (!Objects.equals(user.getId(), booking.getUser().getId())){
+                throw new RuntimeException("This booking does not belong to user");
+            }
+
+           for (BookingItemsResponseDTO itemDTO : itemsResponseDTOS){
+               if (itemDTO.id() != null){
+                   dtoIds.add(itemDTO.id());
+               }
+           }
+
+           for (BookingItem item: bookingItems){
+                if (!dtoIds.contains(item.getId())){
+                    throw new RuntimeException("Item doesnt belong to booking");
+                }
+           }
+
+           Map<Long, UpdateBookingItemDTO> updates = new HashMap<>();
+
+           for (BookingItem item : bookingItems){
+               // item update logic
+           }
+
+          return bookingItemsRepository.findBookingItemsByBookingId(booking.getId());
+
+        }
+
 
 }
