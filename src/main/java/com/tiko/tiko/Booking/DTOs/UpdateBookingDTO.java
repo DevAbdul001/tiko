@@ -2,8 +2,7 @@ package com.tiko.tiko.Booking.DTOs;
 
 import java.util.List;
 
-public record UpdateBookingItemDTO(
-        int quantity,
+public record UpdateBookingDTO(
         Long bookingId,
-        List<Long> itemIds
+        List<BookingItemUpdateDTO> items
 ) {}
