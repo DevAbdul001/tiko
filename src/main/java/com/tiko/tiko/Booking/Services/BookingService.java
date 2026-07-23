@@ -8,14 +8,12 @@ import com.tiko.tiko.Booking.Repository.BookingItemsRepository;
 import com.tiko.tiko.Booking.Repository.BookingRepository;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
-import com.tiko.tiko.Events.Entity.TicketType;
 import com.tiko.tiko.Events.Enums.EventStatus;
 import com.tiko.tiko.Events.Repository.EventTicketPriceRepository;
 import com.tiko.tiko.Events.Repository.EventsRepo;
 import com.tiko.tiko.Events.Repository.TicketTypesRepo;
 import com.tiko.tiko.Users.Entity.User;
 import com.tiko.tiko.Users.Repository.UserRepo;
-import com.tiko.tiko.Users.Service.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -93,8 +91,9 @@ public class BookingService {
                 ));
     }
 
-    private List<BookingItemsResponseDTO> getBookingItemsByBookingId(Long bookingId){
-        return  bookingItemsRepository.findBookingItemsByBookingId(bookingId);
+    private BookingItem getBookingItem(Long itemId){
+        return bookingItemsRepository.findById(itemId)
+                .orElseThrow(()-> new RuntimeException("Invalid booking item id"));
     }
 
     //Validation========================================================================================================
@@ -268,39 +267,36 @@ public class BookingService {
             return bookingRepository.findUserBookingSummary(user.getId(),pageable);
         }
 
-        public List<BookingItemsResponseDTO> updateBookingItems(UpdateBookingItemDTO dto, Long userId){
+        public List<BookingItemsResponseDTO> updateBookingItems(UpdateBookingDTO dto, Long userId){
             User user = this.getUser(userId);
             Booking booking = this.getBooking(dto.bookingId());
-            List<BookingItemsResponseDTO> itemsResponseDTOS = this.getBookingItemsByBookingId(booking.getId());
-            List<BookingItem> bookingItems = bookingItemsRepository.findAllById(dto.itemIds());
+            Map<BookingItem, BookingItemUpdateDTO> updates = new HashMap<>();
+            List<BookingItem> bookingItems = booking.getBookingItems();
 
-           Set<Long> dtoIds = new HashSet<>();
-
-            if (bookingItems.size() != dto.itemIds().size()) {
-                throw new RuntimeException("One or more booking items do not exist.");
+            if (!Objects.equals(booking.getUser().getId(), user.getId())){
+                throw new RuntimeException("Booking doesnt belong to user");
             }
 
-            if (!Objects.equals(user.getId(), booking.getUser().getId())){
-                throw new RuntimeException("This booking does not belong to user");
-            }
+            for (BookingItemUpdateDTO itemUpdateDTO : dto.items()){
+                BookingItem item = this.getBookingItem(itemUpdateDTO.itemId());
 
-           for (BookingItemsResponseDTO itemDTO : itemsResponseDTOS){
-               if (itemDTO.id() != null){
-                   dtoIds.add(itemDTO.id());
-               }
-           }
-
-           for (BookingItem item: bookingItems){
-                if (!dtoIds.contains(item.getId())){
-                    throw new RuntimeException("Item doesnt belong to booking");
+                if (!Objects.equals(item.getBooking().getId(), booking.getId())){
+                    throw new RuntimeException("Booking item does not belong to booking");
                 }
-           }
 
-           Map<Long, UpdateBookingItemDTO> updates = new HashMap<>();
+              updates.put(item, itemUpdateDTO);
+            }
 
-           for (BookingItem item : bookingItems){
-               // item update logic
-           }
+
+            for (Map.Entry<BookingItem, BookingItemUpdateDTO> entry : updates.entrySet()) {
+
+                BookingItem item = entry.getKey();
+                BookingItemUpdateDTO update = entry.getValue();
+
+                item.setQuantity(update.quantity());
+            }
+
+            bookingItemsRepository.saveAll(updates.keySet());
 
           return bookingItemsRepository.findBookingItemsByBookingId(booking.getId());
 
