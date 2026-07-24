@@ -302,5 +302,16 @@ public class BookingService {
 
         }
 
+        public void deleteBooking(Long userId, Long bookingId){
+            User user = this.getUser(userId);
+            Booking booking = this.getBooking(bookingId);
+
+            if (!Objects.equals(booking.getUser().getId(), user.getId())){
+                throw new RuntimeException("Unauthorized action");
+            }
+
+            bookingRepository.deleteById(booking.getId());
+        }
+
 
 }
