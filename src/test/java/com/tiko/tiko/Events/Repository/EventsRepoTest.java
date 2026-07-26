@@ -84,7 +84,6 @@ public class EventsRepoTest {
                 "Doe", "doe@app.com","password"
         );
         User organizer = userRepo.save(user);
-        System.out.println(organizer);
 
         EventCategory category = new EventCategory("Hackathon");
         eventCategoryRepo.save(category);

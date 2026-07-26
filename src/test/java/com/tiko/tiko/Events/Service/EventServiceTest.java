@@ -93,9 +93,9 @@ public class EventServiceTest {
     void shouldCreateEvent() {
         // Arrange
         List<TicketPriceRequestDTO> ticketPriceRequestDTOList = List.of(
-                new TicketPriceRequestDTO(1L, 500, 200),
-                new TicketPriceRequestDTO(2L, 300, 200),
-                new TicketPriceRequestDTO(3L, 150, 100)
+                new TicketPriceRequestDTO(1L, 500L, 200),
+                new TicketPriceRequestDTO(2L, 300L, 200),
+                new TicketPriceRequestDTO(3L, 150L, 100)
         );
 
         User organizer = new User(
@@ -134,7 +134,7 @@ public class EventServiceTest {
         CreateEventRequestDTO dto = new CreateEventRequestDTO(
                 "Java Conference",
                 LocalDateTime.now(),
-                500L,
+                500,
                 "Mombasa",
                 "Description",
                 1L,
@@ -187,33 +187,34 @@ public class EventServiceTest {
         EventCategory eventCategory = new EventCategory("Hackathon");
         EventDetailsDTO eventDetailsDTO = new EventDetailsDTO(
                 1L,
+
+                "Doe",
+                "Doe@mail.com",
                 "Java hackathon",
                 LocalDateTime.now(),
                 "Mombasa",
-                5000L,
-                "A java hackathon",
-                PUBLISHED,
+                5000,
                 "image.png",
-                "Doe",
-                "Doe@mail.com"
+                PUBLISHED
+
         );
         List<TicketPriceDTO> ticketPriceDTOList =  List.of(
                 new TicketPriceDTO(
                         1L,
                         "VIP",
-                        500,
+                        500L,
                         300
                 ),
                 new TicketPriceDTO(
                         2L,
                         "Regular",
-                        300,
+                        300L,
                         200
                 ),
                 new TicketPriceDTO(
                         3L,
                         "VVIP",
-                        1000,
+                        1000L,
                         100
                 )
         );
@@ -260,7 +261,7 @@ public class EventServiceTest {
                 PUBLISHED,
                 "Nairobi",
                 LocalDateTime.now(),
-                7000L,
+                7000,
                 "image.png"
         );
 

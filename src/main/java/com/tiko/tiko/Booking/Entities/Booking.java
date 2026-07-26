@@ -75,6 +75,5 @@ public class Booking {
         this.totalAmount = totalAmount;
         this.event = event;
         this.user = user;
-        this.status = BookingStatus.PENDING;
     }
 }

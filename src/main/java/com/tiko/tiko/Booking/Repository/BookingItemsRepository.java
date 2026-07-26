@@ -21,7 +21,7 @@ public interface BookingItemsRepository extends JpaRepository <BookingItem, Long
     )
     FROM BookingItem bi
     JOIN bi.booking b
-    WHERE bi.bookingId = :bookingId
+    WHERE bi.booking.id = :bookingId
 """)
     List<BookingItemsResponseDTO> findBookingItemsByBookingId(@Param("bookingId") Long bookingId);
 }
