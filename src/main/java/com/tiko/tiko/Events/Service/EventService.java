@@ -91,15 +91,14 @@ public class EventService {
 
         return new EventDetailsDTO(
                 event.getId(),
+                event.getOrganizer().getName(),
+                event.getOrganizer().getEmail(),
                 event.getName(),
                 event.getDate(),
                 event.getLocation(),
                 event.getCapacity(),
-                event.getDescription(),
-                event.getStatus(),
                 event.getImageUrl(),
-                organizer.getName(),
-                organizer.getEmail()
+                event.getStatus()
         );
     }
 

@@ -6,14 +6,13 @@ import java.time.LocalDateTime;
 
 public record EventDetailsDTO(
         Long id,
-        String name,
+        String organizerName,
+        String organizerEmail,
+        String eventName,
         LocalDateTime date,
         String location,
         int capacity,
-        String description,
-        EventStatus status,
-        String imageUrl,
+        String imageUrl  ,
+        EventStatus status
 
-        String organizerName,
-        String organizerEmail
 ) {}

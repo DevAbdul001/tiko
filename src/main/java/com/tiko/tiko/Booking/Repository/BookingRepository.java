@@ -23,9 +23,10 @@ public interface BookingRepository extends JpaRepository <Booking, Long> {
     FROM Booking b
     JOIN b.user u
     JOIN b.event e\s
+    WHERE b.event.id = :eventId
     ORDER BY b.createdAt DESC
 """)
-    Page<BookingResponseDTO> findBookingSummaries(Pageable pageable);
+    Page<BookingResponseDTO> findBookingSummaries(@Param("eventId") Long eventId ,Pageable pageable);
     @Query("""
     SELECT new com.tiko.tiko.Booking.DTOs.BookingResponseDTO(
     b.id,
@@ -38,7 +39,7 @@ public interface BookingRepository extends JpaRepository <Booking, Long> {
     FROM Booking b
     JOIN b.user u
     JOIN b.event e\s
-    WHERE b.userId = :userId
+    WHERE b.user.id = :userId
     ORDER BY b.createdAt DESC
 """)
     Page<BookingResponseDTO> findUserBookingSummary(@Param("userId") Long userId, Pageable pageable);

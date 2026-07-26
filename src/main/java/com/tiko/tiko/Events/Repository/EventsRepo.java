@@ -33,8 +33,8 @@ public interface EventsRepo extends JpaRepository<Event, Long> {
     SELECT new com.tiko.tiko.Events.DTO.EventDetailsDTO(
     e.id,
     u.name,
-    e.name ,
-    e.email,
+    u.email,
+     e.name ,
     e.date,
     e.location,
     e.capacity,
