@@ -1,7 +1,6 @@
 package com.tiko.tiko.Booking.Repository;
 
 import com.tiko.tiko.Booking.DTOs.BookingItemsResponseDTO;
-import com.tiko.tiko.Booking.DTOs.BookingResponseDTO;
 import com.tiko.tiko.Booking.Entities.BookingItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

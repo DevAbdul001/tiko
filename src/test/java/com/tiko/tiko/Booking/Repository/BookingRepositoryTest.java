@@ -1,17 +1,8 @@
 package com.tiko.tiko.Booking.Repository;
 
 import com.tiko.tiko.Booking.DTOs.BookingResponseDTO;
-import com.tiko.tiko.Events.Entity.TicketType;
-import com.tiko.tiko.Events.Repository.EventCategoryRepo;
-import com.tiko.tiko.Events.Repository.EventTicketPriceRepository;
-import com.tiko.tiko.Events.Repository.EventsRepo;
-import com.tiko.tiko.Events.Repository.TicketTypesRepo;
 import com.tiko.tiko.TestDataFactory.Scenerios.BookingScenario;
 import com.tiko.tiko.TestDataFactory.Scenerios.BookingScenarioFactory;
-import com.tiko.tiko.TestDataFactory.TicketTypeFactory;
-import com.tiko.tiko.TestDataFactory.UserFactory;
-import com.tiko.tiko.Users.Entity.User;
-import com.tiko.tiko.Users.Repository.UserRepo;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -53,5 +44,25 @@ class BookingRepositoryTest {
 
         assertThat(dto.userName())
                 .isEqualTo(scenario.customer().getName());
+    }
+
+    @Test
+    void shouldReturnBookingSummariesForUser(){
+        BookingScenario scenario = BookingScenarioFactory.create(em);
+
+        Page<BookingResponseDTO> page =
+                repository.findUserBookingSummary(
+                        scenario.customer().getId(),
+                        PageRequest.of(0,20)
+                );
+
+        BookingResponseDTO dto = page.getContent().get(0);
+
+        assertThat(dto.bookingRef())
+                .isEqualTo(scenario.booking().getBookingRef());
+
+        assertThat(dto.userName())
+                .isEqualTo(scenario.customer().getName());
+
     }
 }
