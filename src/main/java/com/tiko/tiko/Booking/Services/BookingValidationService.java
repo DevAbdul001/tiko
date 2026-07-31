@@ -1,5 +1,6 @@
 package com.tiko.tiko.Booking.Services;
 
+import com.tiko.tiko.Booking.Context.BookingContext;
 import com.tiko.tiko.Booking.DTOs.BookingItemRequest;
 import com.tiko.tiko.Booking.DTOs.CreateBookingRequestDTO;
 import com.tiko.tiko.Events.Entity.Event;
@@ -22,7 +23,8 @@ public class BookingValidationService {
     private EventsRepo eventsRepo;
 
     public void validate(
-            CreateBookingRequestDTO requestDTO
+            CreateBookingRequestDTO requestDTO,
+            BookingContext context
     ){
 
         if (requestDTO.items().isEmpty()) {
@@ -30,32 +32,31 @@ public class BookingValidationService {
         }
 
 
-        Event event = eventsRepo.findById(requestDTO.eventId())
-                .orElseThrow(()-> new RuntimeException("Invalid event id"));
+        Event event = context.event();
         List<EventTicketPrice> ticketPrices = event.getEventTicketPriceList();
 
-        Map<Long, EventTicketPrice> priceLookup =
-                ticketPrices.stream()
-                        .collect(Collectors.toMap(
-                                EventTicketPrice::getId,
-                                Function.identity()
-                        ));
+        Map<Long, EventTicketPrice> priceLookup = context.priceLookUp();
+
+        if (event.getStatus() != EventStatus.PUBLISHED){
+            throw  new RuntimeException("Event is not available for booking");
+        }
 
 
         for ( BookingItemRequest request : requestDTO.items()){
             EventTicketPrice ticketPrice = priceLookup.get(request.eventTicketPriceId());
 
-            if (event.getStatus() != EventStatus.PUBLISHED){
-                throw  new RuntimeException("Event is not available for booking");
-            }
 
             if (ticketPrice == null){
                 throw new RuntimeException("Invalid ticket type");
             }
 
            if (request.quantity() > ticketPrice.getRemainingTickets()){
-               throw new RuntimeException("Insufficient slots remaining" + ticketPrice.getRemainingTickets() + "remaining");
+               throw new RuntimeException(
+                       "Insufficient slots remaining. Available: "
+                               + ticketPrice.getRemainingTickets()
+               );
            }
+
         }
 
 
