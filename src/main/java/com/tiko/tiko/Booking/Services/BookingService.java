@@ -7,12 +7,6 @@ import com.tiko.tiko.Booking.Entities.BookingItem;
 import com.tiko.tiko.Booking.Enums.IdempotencyStatus;
 import com.tiko.tiko.Booking.Repository.BookingItemsRepository;
 import com.tiko.tiko.Booking.Repository.BookingRepository;
-import com.tiko.tiko.Events.Entity.Event;
-import com.tiko.tiko.Events.Entity.EventTicketPrice;
-import com.tiko.tiko.Events.Enums.EventStatus;
-import com.tiko.tiko.Events.Repository.EventTicketPriceRepository;
-import com.tiko.tiko.Events.Repository.EventsRepo;
-import com.tiko.tiko.Events.Repository.TicketTypesRepo;
 import com.tiko.tiko.Users.Entity.User;
 import com.tiko.tiko.Users.Repository.UserRepo;
 import jakarta.transaction.Transactional;
@@ -22,10 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.security.SecureRandom;
+
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+
 
 @Service
 @Transactional
@@ -159,7 +152,6 @@ public class BookingService {
             User user = this.getUser(userId);
             Booking booking = this.getBooking(dto.bookingId());
             Map<BookingItem, BookingItemUpdateDTO> updates = new HashMap<>();
-            List<BookingItem> bookingItems = booking.getBookingItems();
 
             if (!Objects.equals(booking.getUser().getId(), user.getId())){
                 throw new RuntimeException("Booking doesnt belong to user");
