@@ -1,5 +1,6 @@
 package com.tiko.tiko.Booking.Services;
 
+import com.tiko.tiko.Booking.Context.BookingContext;
 import com.tiko.tiko.Booking.DTOs.*;
 import com.tiko.tiko.Booking.Entities.Booking;
 import com.tiko.tiko.Booking.Entities.BookingItem;
@@ -40,28 +41,24 @@ public class BookingService {
     private UserRepo userRepo;
 
     @Autowired
-    private EventsRepo eventsRepo;
-
-    @Autowired
-    private EventTicketPriceRepository eventTicketPriceRepository;
-
-    @Autowired
     private IdempotencyService idempotencyService;
 
+
     @Autowired
-    private TicketTypesRepo ticketTypesRepo;
+    private BookingValidationService validationService;
 
+    @Autowired
+    private BookingFactory bookingFactory;
 
-    //utility method : generates a random 36 char string
-    private String generateBookingRef(){
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[27];
-        random.nextBytes(bytes);
+    @Autowired
+    private BookingReservationService reservationService;
 
-        return Base64.getUrlEncoder()
-                .withoutPadding()
-                .encodeToString(bytes);
-    }
+    @Autowired
+    private BookingContextLoader contextLoader;
+
+    @Autowired
+    private IdempotencyExecutor idempotencyExecutor;
+
 
     //Entity lookups====================================================================================================
     private User getUser(Long userId){
@@ -69,26 +66,10 @@ public class BookingService {
                 .orElseThrow(()-> new RuntimeException("User does not exist"));
     }
 
-    private Event getEvent(Long eventId){
-        return eventsRepo.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
-    }
 
     private Booking getBooking(Long bookingId){
         return  bookingRepository.findById(bookingId)
                 .orElseThrow(()-> new RuntimeException("Booking not found"));
-    }
-
-    private Map<Long, EventTicketPrice> getEventTicketPrices(CreateBookingRequestDTO request) {
-
-        List<EventTicketPrice> ticketPrices =
-                eventTicketPriceRepository.findAllById(request.ticketPriceIds());
-
-        return ticketPrices.stream()
-                .collect(Collectors.toMap(
-                        EventTicketPrice::getId,
-                        Function.identity()
-                ));
     }
 
     private BookingItem getBookingItem(Long itemId){
@@ -96,144 +77,51 @@ public class BookingService {
                 .orElseThrow(()-> new RuntimeException("Invalid booking item id"));
     }
 
-    //Validation========================================================================================================
-    private void validateEventIsActive(Long eventId){
-        Event event = this.getEvent(eventId);
-        if(event.getStatus() != EventStatus.PUBLISHED){
-            throw new RuntimeException("Event is not available for booking");
+
+    public Booking createBooking(CreateBookingRequestDTO requestDTO, Long userId) {
+
+        IdempotencyRecord record =
+                idempotencyService.get(requestDTO.idempotencyKey());
+
+        if (record != null) {
+
+            if (record.status() == IdempotencyStatus.COMPLETED) {
+                return getBooking(record.bookingId());
+            }
+
+            if (record.status() == IdempotencyStatus.PROCESSING) {
+                throw new RuntimeException(
+                        "Request is already being processed."
+                );
+            }
         }
-    }
 
+        return idempotencyExecutor.execute(
+                requestDTO.idempotencyKey(),
+                () -> {
 
-    private void validateTicketTypeAvailability(Long eventTicketPriceId){
-        EventTicketPrice eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId)
-                .orElseThrow(()-> new RuntimeException("Invalid ticket type"));
-    }
+                    BookingContext context =
+                            contextLoader.load(requestDTO.eventId());
 
-    private void validateTicketTypePriceBelongsToEvent(Long eventTicketPriceId, Long eventId){
-        Optional<EventTicketPrice> eventTicketPrice = eventTicketPriceRepository.findById(eventTicketPriceId);
-        if (eventTicketPrice.get().getEvent().getId() != eventId){
-            throw new RuntimeException("Ticket price does not belong to event");
-        }
-    }
+                    User user = getUser(userId);
 
-    //Creation==========================================================================================================
-    private Booking createBookingEntity(CreateBookingRequestDTO requestDTO, Event event, User user){
-        return new Booking(
-                this.generateBookingRef(),
-                0L,
-                event,
-                user
+                    validationService.validate(requestDTO, context);
+
+                    Booking booking =
+                            bookingFactory.create(
+                                    requestDTO,
+                                    context,
+                                    user
+                            );
+
+                    reservationService.reserveTickets(
+                            booking.getBookingItems()
+                    );
+
+                    return bookingRepository.save(booking);
+                }
         );
     }
-
-    private List<BookingItem> createBookingItemsEntity(
-            CreateBookingRequestDTO requestDTO,
-            Map<Long, EventTicketPrice> ticketPrices,
-            Booking booking) {
-
-        List<BookingItem> bookingItems = new ArrayList<>();
-
-        for (BookingItemRequest itemRequest : requestDTO.items()) {
-
-            EventTicketPrice ticketPrice =
-                    ticketPrices.get(itemRequest.eventTicketPriceId());
-
-            BookingItem item = new BookingItem(
-                    itemRequest.quantity(),
-                    ticketPrice.getPrice(),
-                    ticketPrice.getTicketType().getName(),
-                    booking,
-                    ticketPrice
-            );
-
-            bookingItems.add(item);
-        }
-
-        return bookingItems;
-    }
-
-    //Calculations======================================================================================================
-    private Long getTotalAmount(List<BookingItem> bookingItems){
-       return bookingItems.stream()
-               .mapToLong(item -> item.getUnitPrice() * item.getQuantity())
-               .sum();
-    }
-
-    //Reserve ticket====================================================================================================
-    @Transactional
-    private  void reserveTicket(Long ticketPriceId, int quantity){
-
-        Optional<EventTicketPrice> ticket = eventTicketPriceRepository.findByIdForUpdate(ticketPriceId);
-
-        if (ticket.get().getRemainingTickets() < quantity) {
-            throw  new RuntimeException("Not enough tickets" + ticket.get().getRemainingTickets());
-        }
-        ticket.get().setRemainingTickets(ticket.get().getRemainingTickets() - quantity);
-    }
-
-    //Idempotency======================================================================================================
-    private IdempotencyRecord getKey(String key){
-        return  idempotencyService.get(key);
-    }
-
-    public Booking createBooking(CreateBookingRequestDTO requestDTO, Long userId){
-       IdempotencyRecord idempotencyRecord = this.getKey(requestDTO.idempotencyKey());
-
-       if (idempotencyRecord != null) {
-           if (idempotencyRecord.status() == IdempotencyStatus.COMPLETED){
-                return this.getBooking(idempotencyRecord.bookingId());
-           }
-           if (idempotencyRecord.status() == IdempotencyStatus.PROCESSING){
-               throw new RuntimeException("Request is already being processed.");           }
-       }
-       boolean started = idempotencyService.start(requestDTO.idempotencyKey());
-        if (!started) {
-            throw new RuntimeException("Duplicate request.");
-        }
-
-       try {
-
-            //Entity lookup
-            User user = this.getUser(userId);
-            Event event = this.getEvent(requestDTO.eventId());
-            Map<Long, EventTicketPrice> ticketPriceMap = this.getEventTicketPrices(requestDTO);
-
-
-            //Validation
-            this.validateEventIsActive(event.getId());
-            for (BookingItemRequest item : requestDTO.items() ){
-                this.validateTicketTypeAvailability(item.eventTicketPriceId());
-            }
-            for (BookingItemRequest itemRequest : requestDTO.items()){
-                this.validateTicketTypePriceBelongsToEvent(itemRequest.eventTicketPriceId(), event.getId());
-            }
-
-            Booking booking = this.createBookingEntity(requestDTO, event, user);
-            List<BookingItem> bookingItems = this.createBookingItemsEntity(
-                    requestDTO,
-                    ticketPriceMap,
-                    booking
-            );
-
-            booking.setTotalAmount(this.getTotalAmount(bookingItems));
-            for (BookingItemRequest itemRequest : requestDTO.items()){
-                this.reserveTicket(itemRequest.eventTicketPriceId(),itemRequest.quantity());
-            }
-
-            Booking newBooking = bookingRepository.save(booking);
-           assert idempotencyRecord != null;
-           idempotencyService.complete(idempotencyRecord.key(), newBooking);
-            return  newBooking;
-
-    } catch (Exception e) {
-
-           assert idempotencyRecord != null;
-           idempotencyService.remove(idempotencyRecord.key());
-            throw (e);
-        }
-
-        }
 
         public BookingDetailsResponseDTO fetchBookingById( Long bookingId, Long userId ){
                 User user = this.getUser(userId);
