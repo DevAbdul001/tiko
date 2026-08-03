@@ -1,8 +1,7 @@
 package com.tiko.tiko.Booking.Services;
 
 import com.tiko.tiko.Booking.Context.BookingContext;
-import com.tiko.tiko.Booking.DTOs.BookingItemRequest;
-import com.tiko.tiko.Booking.DTOs.CreateBookingRequestDTO;
+import com.tiko.tiko.Booking.DTOs.*;
 import com.tiko.tiko.Booking.Entities.Booking;
 import com.tiko.tiko.Booking.Repository.BookingItemsRepository;
 import com.tiko.tiko.Booking.Repository.BookingRepository;
@@ -24,15 +23,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -116,6 +115,64 @@ public class BookingServiceTest {
         Booking result = bookingService.createBooking(requestDTO, 3L);
 
         assertNotNull(result);
+    }
+
+    @Test
+    void shouldFetchBookingById(){
+        User user = UserFactory.create();
+        EventScenario eventScenario = EventScenarioFactory.create(em);
+        Event event = eventScenario.event();
+
+        Booking booking = new Booking();
+        booking.setId(2L);
+        booking.setBookingRef("booking-ref");
+        booking.setUser(user);
+        booking.setEvent(event);
+        booking.setTotalAmount(600L);
+
+        BookingItemsResponseDTO itemsResponseDTO = new BookingItemsResponseDTO(
+                1L,
+                2L,
+                "VVIP",
+                2,
+                300L
+        );
+        BookingResponseDTO bookingResponseDTO = new BookingResponseDTO(
+                2L,
+                "booking-ref",
+                user.getName(),
+                "mock event",
+                600L,
+                LocalDateTime.now()
+        );
+
+        BookingDetailsResponseDTO responseDTO = new BookingDetailsResponseDTO(
+                bookingResponseDTO,
+                List.of(itemsResponseDTO)
+        );
+
+        when(userRepo.findById(5L)).thenReturn(Optional.of(user));
+        when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
+        when(bookingItemsRepository.findBookingItemsByBookingId(2L)).thenReturn(List.of(itemsResponseDTO));
+
+        BookingDetailsResponseDTO result = bookingService.fetchBookingById(2L, 5L);
+        assertNotNull(result);
+
+        assertEquals(
+                booking.getBookingRef(),
+               result.bookingResponseDTO().bookingRef()
+        );
+
+        assertEquals(
+                booking.getTotalAmount(),
+                result.bookingResponseDTO().totalAmount()
+        );
+
+        assertEquals(
+                1,
+                result.items().size()
+        );
+
     }
 
 }
