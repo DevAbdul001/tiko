@@ -1,8 +1,7 @@
 package com.tiko.tiko.Booking.Services;
 
-import com.tiko.tiko.Booking.DTOs.IdempotencyRecord;
+
 import com.tiko.tiko.Booking.Entities.Booking;
-import com.tiko.tiko.Booking.Enums.IdempotencyStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Supplier;
