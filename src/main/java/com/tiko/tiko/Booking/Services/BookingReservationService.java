@@ -34,7 +34,7 @@ public class BookingReservationService {
                                 + ticketPrice.getRemainingTickets() );
             }
 
-            ticketForUpdate.setRemainingTickets(ticketPrice.getRemainingTickets()- item.getQuantity());
+            ticketForUpdate.setRemainingTickets(ticketForUpdate.getRemainingTickets()- item.getQuantity());
         }
     }
 }

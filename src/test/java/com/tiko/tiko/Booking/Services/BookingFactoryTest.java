@@ -1,10 +1,9 @@
-package com.tiko.tiko.Events.Service;
+package com.tiko.tiko.Booking.Services;
 
 import com.tiko.tiko.Booking.Context.BookingContext;
 import com.tiko.tiko.Booking.DTOs.BookingItemRequest;
 import com.tiko.tiko.Booking.DTOs.CreateBookingRequestDTO;
 import com.tiko.tiko.Booking.Entities.Booking;
-import com.tiko.tiko.Booking.Services.BookingFactory;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
 import com.tiko.tiko.Events.Entity.TicketType;
