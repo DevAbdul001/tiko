@@ -15,7 +15,7 @@ import java.util.List;
 @Getter
 @Setter
 @Table(name ="event_ticket_prices")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class EventTicketPrice {
 
     @Id
