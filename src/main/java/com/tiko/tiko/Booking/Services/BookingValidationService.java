@@ -6,21 +6,14 @@ import com.tiko.tiko.Booking.DTOs.CreateBookingRequestDTO;
 import com.tiko.tiko.Events.Entity.Event;
 import com.tiko.tiko.Events.Entity.EventTicketPrice;
 import com.tiko.tiko.Events.Enums.EventStatus;
-import com.tiko.tiko.Events.Repository.EventsRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 
 @Service
 public class BookingValidationService {
 
-    @Autowired
-    private EventsRepo eventsRepo;
 
     public void validate(
             CreateBookingRequestDTO requestDTO,
@@ -33,7 +26,6 @@ public class BookingValidationService {
 
 
         Event event = context.event();
-        List<EventTicketPrice> ticketPrices = event.getEventTicketPriceList();
 
         Map<Long, EventTicketPrice> priceLookup = context.priceLookUp();
 
